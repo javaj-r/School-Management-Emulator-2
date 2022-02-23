@@ -14,16 +14,16 @@ public class ProfessorServiceImpl extends BaseServiceImpl<Professor, Integer, Pr
 
     @Override
     public Professor findByUsername(Professor entity) {
-        return null;
+        return repository.findByUsername(entity);
     }
 
     @Override
     public Professor findByUsernameAndPassword(Professor entity) {
-        return null;
+        return repository.findByUsernameAndPassword(entity);
     }
 
     @Override
     public Integer save(Professor entity) {
-        return null;
+        return repository.save(entity);
     }
 }
