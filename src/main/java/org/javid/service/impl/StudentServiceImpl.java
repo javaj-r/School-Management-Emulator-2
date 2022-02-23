@@ -14,16 +14,16 @@ public class StudentServiceImpl extends BaseServiceImpl<Student, Integer, Studen
 
     @Override
     public Student findByUsername(Student entity) {
-        return null;
+        return repository.findByUsername(entity);
     }
 
     @Override
     public Student findByUsernameAndPassword(Student entity) {
-        return null;
+        return repository.findByUsernameAndPassword(entity);
     }
 
     @Override
     public Integer save(Student entity) {
-        return null;
+        return repository.save(entity);
     }
 }
