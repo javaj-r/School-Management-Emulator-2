@@ -14,7 +14,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee, Integer, Empl
 
     @Override
     public Employee findByUsername(Employee entity) {
-        return null;
+        return repository.findByUsername(entity);
     }
 
     @Override
@@ -24,6 +24,6 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee, Integer, Empl
 
     @Override
     public Integer save(Employee entity) {
-        return null;
+        return repository.save(entity);
     }
 }
