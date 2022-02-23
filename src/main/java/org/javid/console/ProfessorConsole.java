@@ -1,7 +1,7 @@
 package org.javid.console;
 
 import org.javid.Application;
-import org.javid.console.base.UserConsole;
+import org.javid.console.base.PersonConsole;
 import org.javid.model.Professor;
 import org.javid.service.ProfessorService;
 import org.javid.util.Screen;
@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ProfessorConsole extends UserConsole<Professor, ProfessorService> {
+public class ProfessorConsole extends PersonConsole<Professor, ProfessorService> {
 
     public ProfessorConsole(ProfessorService service) {
         super(service);
