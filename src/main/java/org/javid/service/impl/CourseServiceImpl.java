@@ -14,6 +14,6 @@ public class CourseServiceImpl extends BaseServiceImpl<Course, Integer, CourseRe
 
     @Override
     public Integer save(Course entity) {
-        return null;
+        return repository.save(entity);
     }
 }
