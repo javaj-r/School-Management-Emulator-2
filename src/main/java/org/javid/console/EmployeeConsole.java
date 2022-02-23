@@ -1,7 +1,7 @@
 package org.javid.console;
 
 import org.javid.Application;
-import org.javid.console.base.UserConsole;
+import org.javid.console.base.PersonConsole;
 import org.javid.context.ApplicationContext;
 import org.javid.model.Employee;
 import org.javid.service.EmployeeService;
@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EmployeeConsole extends UserConsole<Employee, EmployeeService> {
+public class EmployeeConsole extends PersonConsole<Employee, EmployeeService> {
 
     public EmployeeConsole(EmployeeService service) {
         super(service);
@@ -25,8 +25,7 @@ public class EmployeeConsole extends UserConsole<Employee, EmployeeService> {
 
     @Override
     public void userMenu() {
-        List<String> list = Arrays.asList("Add Student", "Delete Student", "Edit Student"
-                , "Add Course", "Delete Course", "Edit Course");
+        List<String> list = Arrays.asList( "Add Course", "Delete Course", "Edit Course");
 
         if ("admin".equals(currentUser.getUsername())) {
             adminMenu();
@@ -65,10 +64,10 @@ public class EmployeeConsole extends UserConsole<Employee, EmployeeService> {
                         ApplicationContext.getProfessorConsole().manage();
                         break;
                     case 3:
-//                        ApplicationContext.getCustomerConsole().login();
+                        ApplicationContext.getStudentConsole().manage();
                         break;
                     case 4:
-//                        ApplicationContext.getCustomerConsole().login();
+                        ApplicationContext.getCourseConsole().manage();
                         break;
                 }
             } catch (Exception e) {
