@@ -1,7 +1,6 @@
 package org.javid.service.base;
 
 import lombok.RequiredArgsConstructor;
-import org.javid.model.Course;
 import org.javid.model.base.BaseEntity;
 import org.javid.repository.base.CrudRepository;
 
