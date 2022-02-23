@@ -3,7 +3,6 @@ package org.javid.repository.impl;
 import lombok.NonNull;
 import org.javid.connection.PostgresConnection;
 import org.javid.model.Course;
-import org.javid.model.Student;
 import org.javid.repository.CourseRepository;
 import org.javid.repository.base.CrudRepositoryImpl;
 import org.javid.repository.base.PrimitiveHandler;
