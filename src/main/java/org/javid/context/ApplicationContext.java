@@ -2,8 +2,10 @@ package org.javid.context;
 
 
 import org.javid.connection.PostgresConnection;
+import org.javid.console.CourseConsole;
 import org.javid.console.EmployeeConsole;
 import org.javid.console.ProfessorConsole;
+import org.javid.console.StudentConsole;
 import org.javid.repository.CourseRepository;
 import org.javid.repository.EmployeeRepository;
 import org.javid.repository.ProfessorRepository;
@@ -53,7 +55,6 @@ public class ApplicationContext {
 
     public static StudentService getStudentService() {
         return new StudentServiceImpl(getStudentRepository());
-
     }
 
     private static StudentRepository getStudentRepository() {
@@ -66,5 +67,13 @@ public class ApplicationContext {
 
     public static ProfessorConsole getProfessorConsole() {
         return new ProfessorConsole(getProfessorService());
+    }
+
+    public static StudentConsole getStudentConsole() {
+        return new StudentConsole(getStudentService());
+    }
+
+    public static CourseConsole getCourseConsole() {
+        return new CourseConsole(getCourseService());
     }
 }
