@@ -3,6 +3,7 @@ package org.javid.repository.impl;
 import lombok.NonNull;
 import org.javid.connection.PostgresConnection;
 import org.javid.model.Course;
+import org.javid.model.Professor;
 import org.javid.model.Student;
 import org.javid.repository.CourseRepository;
 import org.javid.repository.base.CrudRepositoryImpl;
@@ -12,10 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class CourseRepositoryImpl extends CrudRepositoryImpl<Course, Integer> implements CourseRepository {
@@ -147,6 +145,34 @@ public class CourseRepositoryImpl extends CrudRepositoryImpl<Course, Integer> im
         }
     }
 
+    @Override
+    public void findAllCoursesByProfessorId(Professor professor) {
+        String query = "SELECT termNumber, c.id, c.name, c.unit, c.requiredCourseId FROM professor_course p"
+                + "\n JOIN course c ON p.courseId = c.id"
+                + "\n WHERE p.professorId = ?;";
+
+        professor.getCourses().clear();
+        try (PreparedStatement statement = getPreparedStatement(query)) {
+            statement.setInt(1, professor.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                mapCourseToProfessorCourses(professor, resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void mapCourseToProfessorCourses(Professor professor, ResultSet resultSet) throws SQLException {
+        HashMap<Integer, Set<Course>> courses = professor.getCourses();
+        Course course = parseEntity(resultSet);
+        int termNumber = resultSet.getInt("termNumber");
+        if (!courses.containsKey(termNumber))
+            courses.put(termNumber, new HashSet<>());
+
+        courses.get(termNumber).add(course);
+    }
+
     private void mapCourseToStudentCourses(Student student, ResultSet resultSet) throws SQLException {
         Map<Integer, Map<Course, Integer>> courses = student.getCourses();
         Course course = parseEntity(resultSet);
@@ -156,8 +182,7 @@ public class CourseRepositoryImpl extends CrudRepositoryImpl<Course, Integer> im
         if (!courses.containsKey(termNumber))
             courses.put(termNumber, new HashMap<>());
 
-        Map<Course, Integer> termCourses = courses.get(termNumber);
-        termCourses.put(course, score);
+        courses.get(termNumber).put(course, score);
     }
 
 }
