@@ -2,18 +2,23 @@ package org.javid.console;
 
 import org.javid.Application;
 import org.javid.console.base.PersonConsole;
+import org.javid.model.Course;
 import org.javid.model.Student;
 import org.javid.service.StudentService;
 import org.javid.util.Screen;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class StudentConsole extends PersonConsole<Student, StudentService> {
 
-    public StudentConsole(StudentService service) {
+    private final CourseConsole courseConsole;
+
+    public StudentConsole(StudentService service, CourseConsole courseConsole) {
         super(service);
+        this.courseConsole = courseConsole;
     }
 
     @Override
@@ -23,7 +28,118 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
 
     @Override
     public void userMenu() {
-        System.out.println("Logged in");
+        while (true) {
+            try {
+                int choice = Screen.showMenu("Exit"
+                        , Arrays.asList("My Information", "Show Courses", "Select Course", "My Courses"));
+
+                if (choice == 0)
+                    break;
+
+                switch (choice) {
+                    case 1:
+                        System.out.println(currentUser.toString());
+                        break;
+                    case 2:
+                        courseConsole.showAll();
+                        break;
+                    case 3:
+                        selectCourse();
+                        break;
+                    case 4:
+                        showStudentCourses();
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void selectCourse() {
+        courseConsole.fetchStudentCourses(currentUser);
+        Map<Integer, Map<Course, Integer>> courses = currentUser.getCourses();
+        int term = currentUser.getTermNumber();
+        Course course = courseConsole.select("Select a course for adding to your courses: ");
+
+        if (courses.containsKey(term)){
+            if (courses.get(term).containsKey(course)) {
+                System.out.println("Already selected");
+                return;
+            }
+
+            if (term > 1) {
+                int[] currentUnits = new int[]{0};
+                courses.get(term).keySet().forEach(course1 -> currentUnits[0] += course1.getUnit());
+                if (course.getUnit() + currentUnits[0] > getPermeatedUnits(courses, term)) {
+                    System.out.println("Out of permeated units limit!");
+                    return;
+                }
+            }
+        }
+
+        if (isPassedCourse(courses, course)) {
+            System.out.println("You passed this course.");
+            return;
+        }
+
+        if (course.getRequiredCourse() != null) {
+            if (term == 1 || !isPassedRequiredCourse(courses, course, term)) {
+                System.out.println("Course hase required course that you didn't passed yet!");
+                return;
+            }
+        }
+
+        service.saveStudentCourse(currentUser, course);
+    }
+
+    private int getPermeatedUnits(Map<Integer, Map<Course, Integer>> courses, int currentTerm) {
+        if (currentTerm == 1)
+            return 24;
+
+        int[] scoreSum = new int[]{0};
+        courses.get(currentTerm - 1).values().forEach(score -> scoreSum[0] += score);
+        int avg = (scoreSum[0] / courses.get(currentTerm - 1).size());
+        return avg >= 18 ? 24 : 20;
+    }
+
+    private boolean isPassedRequiredCourse(Map<Integer, Map<Course, Integer>> courses, Course course, int term){
+        Map<Integer, Map<Course, Integer>> passedCourses = courses.entrySet()
+                .stream().filter(integerMapEntry -> integerMapEntry.getKey() < term)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue));
+        return isPassedCourse(passedCourses, course);
+    }
+
+
+    private boolean isPassedCourse(Map<Integer, Map<Course, Integer>> courses, Course course) {
+        for (Map<Course, Integer> map : courses.values()) {
+            for (Map.Entry<Course, Integer> entry:map.entrySet()) {
+                if (course.equals(entry.getKey()) && entry.getValue()> 10) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void showStudentCourses() {
+        courseConsole.fetchStudentCourses(currentUser);
+        currentUser.getCourses()
+                .entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry ->
+                        entry.getValue()
+                                .forEach((course, score) ->
+                                        printStudentCourse(entry.getKey(), course, score)
+                                ));
+    }
+
+    private void printStudentCourse(Integer termNumber, Course course, Integer score) {
+        System.out.println("[ Term:" + termNumber +
+                ", Course: " + course.getName() +
+                ", Score:" + score + " ]");
     }
 
     public void manage() {
@@ -53,7 +169,7 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
 
     private void saveStudent() {
         Student student = save();
-        if (Application.confirmMenu("Save Student") > 0) {
+        if (student != null && Application.confirmMenu("Save Student") > 0) {
             System.out.println(service.save(student) != null ?
                     "Student saved successfully." :
                     "Failed to save student!");
@@ -62,8 +178,9 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
 
     @Override
     public Student save() {
-        return super.save()
-                .setStudentCode(Screen.getInt("Student code: "))
+        Student student = super.save();
+        return student == null ? null
+                : student.setStudentCode(Screen.getInt("Student code: "))
                 .setTermNumber(Math.max(1, Screen.getInt("Student term number [>= 1]: ")));
     }
 
@@ -107,7 +224,7 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
 
         String lastname = Screen.getString("Enter - or new lastname: ");
         if (Application.isForUpdate(lastname))
-            student.setFirstname(lastname);
+            student.setLastname(lastname);
 
         long nationalCode = Screen.getLong("Enter -1 or new national code: ");
         if (nationalCode >= 0)
@@ -119,7 +236,7 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
 
         int termNumber = Screen.getInt("Enter 0 or new term number [>= 1]: ");
         if (termNumber > 0)
-            student.setStudentCode(termNumber);
+            student.setTermNumber(termNumber);
 
         if (Application.confirmMenu("Save changes") > 0) {
             service.update(student);

@@ -70,7 +70,7 @@ public class ApplicationContext {
     }
 
     public static StudentConsole getStudentConsole() {
-        return new StudentConsole(getStudentService());
+        return new StudentConsole(getStudentService(), getCourseConsole());
     }
 
     public static CourseConsole getCourseConsole() {
