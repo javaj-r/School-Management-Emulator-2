@@ -178,4 +178,22 @@ public class StudentRepositoryImpl extends CrudRepositoryImpl<Student, Integer> 
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void updateStudentCourseScore(Student student, Course course, int score) {
+        String query = "UPDATE student_course SET"
+                + "\n score = ?"
+                + "\n WHERE studentId = ?"
+                + "\n AND courseId = ?"
+                + "\n AND termNumber = ?;";
+        try (PreparedStatement statement = getPreparedStatement(query)) {
+            statement.setInt(1, score);
+            statement.setInt(2, student.getId());
+            statement.setInt(3, course.getId());
+            statement.setInt(4, student.getTermNumber());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

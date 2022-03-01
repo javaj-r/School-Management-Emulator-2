@@ -8,4 +8,6 @@ import org.javid.repository.base.UserRepository;
 public interface StudentRepository extends CrudRepository<Student, Integer>, UserRepository<Student> {
 
     void saveStudentCourse(Student student, Course course);
+
+    void updateStudentCourseScore(Student student, Course course, int score);
 }
