@@ -3,6 +3,7 @@ package org.javid.console;
 import lombok.RequiredArgsConstructor;
 import org.javid.Application;
 import org.javid.model.Course;
+import org.javid.model.Student;
 import org.javid.service.CourseService;
 import org.javid.util.Screen;
 
@@ -46,11 +47,22 @@ public class CourseConsole {
                 .setUnit(Math.max(1, Screen.getInt("Course unit [>= 1]: ")))
                 .setRequiredCourse(select("Select required course: "));
 
-        if (Application.confirmMenu("Save Student") > 0) {
+        if (Application.confirmMenu("Save Course") > 0) {
             System.out.println(service.save(course) != null ?
                     "Course saved successfully." :
                     "Failed to save course!");
         }
+    }
+
+    public void showAll() {
+        service.findAll()
+                .stream()
+                .map(Course::toString)
+                .forEach(System.out::println);
+    }
+
+    public void fetchStudentCourses(Student student) {
+        service.findAllCoursesByStudentId(student);
     }
 
     public Course select(String message) {
