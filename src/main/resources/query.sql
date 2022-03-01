@@ -82,9 +82,29 @@ FROM student
 WHERE 1 = 1;
 
 
+INSERT INTO student_course(studentid, courseid, termnumber)
+VALUES (?, ?, ?);
 
 
+INSERT INTO professor_course(professorid, courseid, termnumber)
+VALUES (?, ?, ?);
 
+
+SELECT s.termnumber, s.score, c.id, c.name, c.unit, c.requiredcourseid FROM student_course s
+JOIN course c ON s.courseid = c.id
+WHERE s.studentid = ?;
+
+
+SELECT termnumber, c.id, c.name, c.unit, c.requiredcourseid FROM professor_course p
+JOIN course c ON p.courseid = c.id
+WHERE p.professorid = ?;
+
+
+UPDATE student_course SET
+score = ?
+WHERE studentid = ?
+AND courseid = ?
+AND termnumber = ?;
 
 
 
