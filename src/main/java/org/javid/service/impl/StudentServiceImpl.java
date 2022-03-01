@@ -32,4 +32,9 @@ public class StudentServiceImpl extends BaseServiceImpl<Student, Integer, Studen
     public void saveStudentCourse(Student student, Course course) {
         repository.saveStudentCourse(student, course);
     }
+
+    @Override
+    public void updateStudentCourseScore(Student student, Course course, int score) {
+        repository.updateStudentCourseScore(student, course, score);
+    }
 }

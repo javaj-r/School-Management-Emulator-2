@@ -8,4 +8,6 @@ import org.javid.service.base.UserService;
 public interface StudentService extends BaseService<Student, Integer>, UserService<Student> {
 
     void saveStudentCourse(Student student, Course course);
+
+    void updateStudentCourseScore(Student student, Course course, int score);
 }
