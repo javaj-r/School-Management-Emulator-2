@@ -27,7 +27,7 @@ public class Professor extends Employee {
     private static long salaryPerCourse = 1_000_000L;
     private static long facultyMemberFee = 5_000_000L;
     private boolean facultyMember;
-    private HashMap<Course, Integer> courses = new HashMap<>();
+    private HashMap<Integer, Set<Course>> courses = new HashMap<>();
 
     @Override
     public Professor setId(Integer integer) {
@@ -76,6 +76,23 @@ public class Professor extends Employee {
         super.setSalary(salary);
         return this;
     }
+
+    public Long getSalary(int termNumber) {
+        long salary = 0;
+        if (courses.containsKey(termNumber)) {
+            salary = salaryPerCourse * getTermUnits(courses.get(termNumber));
+            if (isFacultyMember())
+                salary += facultyMemberFee;
+        }
+        return salary;
+    }
+
+    private int getTermUnits(Set<Course> termCourses) {
+        int[] units = new int[]{0};
+        termCourses.forEach(course -> units[0] += course.getUnit());
+        return units[0];
+    }
+
 
     @Override
     public String toString() {

@@ -13,10 +13,12 @@ import java.util.stream.Collectors;
 public class ProfessorConsole extends PersonConsole<Professor, ProfessorService> {
 
     private final CourseConsole courseConsole;
+    private final StudentConsole studentConsole;
 
-    public ProfessorConsole(ProfessorService service, CourseConsole courseConsole) {
+    public ProfessorConsole(ProfessorService service, CourseConsole courseConsole, StudentConsole studentConsole) {
         super(service);
         this.courseConsole = courseConsole;
+        this.studentConsole = studentConsole;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
         while (true) {
             try {
                 int choice = Screen.showMenu("Exit"
-                        , Arrays.asList("My Information", "Show Courses", "Select Course", "My Courses"));
+                        , Arrays.asList("My Information", "Score Students", "See salary"));
 
                 if (choice == 0)
                     break;
@@ -39,19 +41,22 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
                         System.out.println(currentUser.toString());
                         break;
                     case 2:
-//                        courseConsole.showAll();
+                        studentConsole.updateStudentCourseScore();
                         break;
                     case 3:
-//                        selectCourse();
-                        break;
-                    case 4:
-//                        showStudentCourses();
+                        printSalary();
                         break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void printSalary() {
+        courseConsole.fetchProfessorCourses(currentUser);
+        int term = Screen.getInt("Enter term number: ");
+        System.out.println(currentUser.getSalary(term));
     }
 
     public void manage() {
