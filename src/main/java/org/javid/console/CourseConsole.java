@@ -3,6 +3,7 @@ package org.javid.console;
 import lombok.RequiredArgsConstructor;
 import org.javid.Application;
 import org.javid.model.Course;
+import org.javid.model.Professor;
 import org.javid.model.Student;
 import org.javid.service.CourseService;
 import org.javid.util.Screen;
@@ -63,6 +64,10 @@ public class CourseConsole {
 
     public void fetchStudentCourses(Student student) {
         service.findAllCoursesByStudentId(student);
+    }
+
+    public void fetchProfessorCourses(Professor professor) {
+        service.findAllCoursesByProfessorId(professor);
     }
 
     public Course select(String message) {
