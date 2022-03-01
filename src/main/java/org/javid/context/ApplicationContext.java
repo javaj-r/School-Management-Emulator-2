@@ -66,7 +66,7 @@ public class ApplicationContext {
     }
 
     public static ProfessorConsole getProfessorConsole() {
-        return new ProfessorConsole(getProfessorService());
+        return new ProfessorConsole(getProfessorService(), getCourseConsole());
     }
 
     public static StudentConsole getStudentConsole() {

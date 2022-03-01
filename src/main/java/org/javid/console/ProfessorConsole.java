@@ -2,19 +2,21 @@ package org.javid.console;
 
 import org.javid.Application;
 import org.javid.console.base.PersonConsole;
+import org.javid.model.Course;
 import org.javid.model.Professor;
 import org.javid.service.ProfessorService;
 import org.javid.util.Screen;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProfessorConsole extends PersonConsole<Professor, ProfessorService> {
 
-    public ProfessorConsole(ProfessorService service) {
+    private final CourseConsole courseConsole;
+
+    public ProfessorConsole(ProfessorService service, CourseConsole courseConsole) {
         super(service);
+        this.courseConsole = courseConsole;
     }
 
     @Override
@@ -24,13 +26,39 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
 
     @Override
     public void userMenu() {
-        System.out.println("Logged in");
+        while (true) {
+            try {
+                int choice = Screen.showMenu("Exit"
+                        , Arrays.asList("My Information", "Show Courses", "Select Course", "My Courses"));
+
+                if (choice == 0)
+                    break;
+
+                switch (choice) {
+                    case 1:
+                        System.out.println(currentUser.toString());
+                        break;
+                    case 2:
+//                        courseConsole.showAll();
+                        break;
+                    case 3:
+//                        selectCourse();
+                        break;
+                    case 4:
+//                        showStudentCourses();
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void manage() {
         while (true) {
             try {
-                int choice = Screen.showMenu("Exit", Arrays.asList("Add Professor", "Delete Professor", "Edit Professor"));
+                int choice = Screen.showMenu("Exit", Arrays.asList("Add Professor", "Delete Professor"
+                        , "Edit Professor", "Select Course For Professor"));
 
                 if (choice == 0)
                     break;
@@ -45,11 +73,31 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
                     case 3:
                         update();
                         break;
+                    case 4:
+                        addProfessorCourse();
+                        break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void addProfessorCourse() {
+        Professor professor = select("Select professor: ");
+        courseConsole.fetchProfessorCourses(professor);
+        HashMap<Integer, Set<Course>> courses = professor.getCourses();
+        int term = Screen.getInt("Enter Term Number: ");
+        Course course = courseConsole.select("Select course: ");
+
+        if (courses.containsKey(term)) {
+            if (courses.get(term).contains(course)) {
+                System.out.println("Already added");
+                return;
+            }
+        }
+
+        service.saveProfessorCourse(professor, course, term);
     }
 
     private void saveProfessor() {
