@@ -29,7 +29,7 @@ public class Course extends BaseEntity<Integer> {
     public String toString() {
         return "[ codeName:" + getName() +
                 ", unit:" + unit +
-                ", requiredCourse:" + (requiredCourse == null ? null : requiredCourse.getName()) +
+                ", requiredCourseId:" + (requiredCourse == null ? null : requiredCourse.getId()) +
                 " ]";
     }
 }
