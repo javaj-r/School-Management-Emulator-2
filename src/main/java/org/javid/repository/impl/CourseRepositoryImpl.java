@@ -3,6 +3,7 @@ package org.javid.repository.impl;
 import lombok.NonNull;
 import org.javid.connection.PostgresConnection;
 import org.javid.model.Course;
+import org.javid.model.Student;
 import org.javid.repository.CourseRepository;
 import org.javid.repository.base.CrudRepositoryImpl;
 import org.javid.repository.base.PrimitiveHandler;
@@ -12,7 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class CourseRepositoryImpl extends CrudRepositoryImpl<Course, Integer> implements CourseRepository {
@@ -34,6 +37,7 @@ public class CourseRepositoryImpl extends CrudRepositoryImpl<Course, Integer> im
         Integer requiredCourseId = resultSet.wasNull() ? null : temp;
 
         return new Course()
+                .setId(resultSet.getInt("id"))
                 .setName(resultSet.getString("name"))
                 .setUnit(unit)
                 .setRequiredCourse(new Course().setId(requiredCourseId));
@@ -103,7 +107,7 @@ public class CourseRepositoryImpl extends CrudRepositoryImpl<Course, Integer> im
                 "\n unit = ?," +
                 "\n requiredCourseId = ?" +
                 "\n WHERE id = ?;";
-        try (PreparedStatement statement = getPreparedStatement(query)){
+        try (PreparedStatement statement = getPreparedStatement(query)) {
             mapEntity(statement, entity);
             PrimitiveHandler.setInt(statement, 4, entity::isNew, entity::getId);
             statement.execute();
@@ -124,4 +128,36 @@ public class CourseRepositoryImpl extends CrudRepositoryImpl<Course, Integer> im
         }
 
     }
+
+    @Override
+    public void findAllCoursesByStudentId(Student student) {
+        String query = "SELECT s.termNumber, s.score, c.id, c.name, c.unit, c.requiredCourseId FROM student_course s"
+                + "\n JOIN course c ON s.courseId = c.id"
+                + "\n WHERE s.studentId = ?;";
+
+        student.getCourses().clear();
+        try (PreparedStatement statement = getPreparedStatement(query)) {
+            statement.setInt(1, student.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                mapCourseToStudentCourses(student, resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void mapCourseToStudentCourses(Student student, ResultSet resultSet) throws SQLException {
+        Map<Integer, Map<Course, Integer>> courses = student.getCourses();
+        Course course = parseEntity(resultSet);
+        int termNumber = resultSet.getInt("termNumber");
+        int temp = resultSet.getInt("score");
+        Integer score = resultSet.wasNull() ? null : temp;
+        if (!courses.containsKey(termNumber))
+            courses.put(termNumber, new HashMap<>());
+
+        Map<Course, Integer> termCourses = courses.get(termNumber);
+        termCourses.put(course, score);
+    }
+
 }
