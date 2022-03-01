@@ -62,7 +62,7 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
         int term = currentUser.getTermNumber();
         Course course = courseConsole.select("Select a course for adding to your courses: ");
 
-        if (courses.containsKey(term)){
+        if (courses.containsKey(term)) {
             if (courses.get(term).containsKey(course)) {
                 System.out.println("Already selected");
                 return;
@@ -103,7 +103,7 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
         return avg >= 18 ? 24 : 20;
     }
 
-    private boolean isPassedRequiredCourse(Map<Integer, Map<Course, Integer>> courses, Course course, int term){
+    private boolean isPassedRequiredCourse(Map<Integer, Map<Course, Integer>> courses, Course course, int term) {
         Map<Integer, Map<Course, Integer>> passedCourses = courses.entrySet()
                 .stream().filter(integerMapEntry -> integerMapEntry.getKey() < term)
                 .collect(Collectors.toMap(
@@ -115,8 +115,8 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
 
     private boolean isPassedCourse(Map<Integer, Map<Course, Integer>> courses, Course course) {
         for (Map<Course, Integer> map : courses.values()) {
-            for (Map.Entry<Course, Integer> entry:map.entrySet()) {
-                if (course.equals(entry.getKey()) && entry.getValue()> 10) {
+            for (Map.Entry<Course, Integer> entry : map.entrySet()) {
+                if (course.equals(entry.getKey()) && entry.getValue() > 10) {
                     return true;
                 }
             }
@@ -242,5 +242,29 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
             service.update(student);
             System.out.println("Student updated successfully.");
         }
+    }
+
+    public void updateStudentCourseScore() {
+        Student student = select("Select Student: ");
+        Course course = courseConsole.select("Select Course: ");
+        int score = getScore();
+        if (score == -1)
+            return;
+        if (Application.confirmMenu("Save Student Score: ") > 0) {
+            service.updateStudentCourseScore(student, course, score);
+        }
+    }
+
+    private int getScore() {
+        boolean loopFlag = true;
+        while (loopFlag) {
+            int score = Screen.getInt("Enter score: ");
+            if (score >= 0 && score <= 20)
+                return score;
+
+            int choice = tryAgainOrExit("Invalid score");
+            loopFlag = choice != 0;
+        }
+        return -1;
     }
 }
