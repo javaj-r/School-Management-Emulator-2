@@ -54,7 +54,7 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
 
     private void saveProfessor() {
         Professor professor = save();
-        if (Application.confirmMenu("Save professor") > 0) {
+        if (professor != null && Application.confirmMenu("Save professor") > 0) {
             System.out.println(service.save(professor) != null ?
                     "Professor saved successfully." :
                     "Failed to save professor!");
@@ -63,7 +63,11 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
 
     @Override
     public Professor save() {
-        Professor professor = super.save().setSalary(Screen.getLong("Salary: "));
+        Professor professor = super.save();
+        if (professor == null)
+            return null;
+
+        professor.setSalary(Screen.getLong("Salary: "));
         int choice = Screen.showMenu("Faculty member: ", "No", Collections.singletonList("Yes"));
         return professor.setFacultyMember(choice == 1);
     }
@@ -108,7 +112,7 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
 
         String lastname = Screen.getString("Enter - or new lastname: ");
         if (Application.isForUpdate(lastname))
-            professor.setFirstname(lastname);
+            professor.setLastname(lastname);
 
         long nationalCode = Screen.getLong("Enter -1 or new national code: ");
         if (nationalCode >= 0)
