@@ -2,6 +2,7 @@ package org.javid.service.impl;
 
 import lombok.NonNull;
 import org.javid.model.Course;
+import org.javid.model.Professor;
 import org.javid.model.Student;
 import org.javid.repository.CourseRepository;
 import org.javid.service.CourseService;
@@ -21,5 +22,10 @@ public class CourseServiceImpl extends BaseServiceImpl<Course, Integer, CourseRe
     @Override
     public void findAllCoursesByStudentId(Student student) {
         repository.findAllCoursesByStudentId(student);
+    }
+
+    @Override
+    public void findAllCoursesByProfessorId(Professor professor) {
+        repository.findAllCoursesByProfessorId(professor);
     }
 }
