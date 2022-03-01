@@ -12,6 +12,9 @@ public abstract class PersonConsole<T extends Person, S extends UserService<T>> 
 
     public T save() {
         T person = super.save();
+        if(person == null)
+            return null;
+
         person.setFirstname(Screen.getString("Firstname: "))
                 .setLastname(Screen.getString("Lastname: "))
                 .setNationalCode(Screen.getLong("National Code: "));
