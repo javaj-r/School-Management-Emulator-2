@@ -25,7 +25,7 @@ public class EmployeeConsole extends PersonConsole<Employee, EmployeeService> {
 
     @Override
     public void userMenu() {
-        List<String> list = Arrays.asList( "Add Course", "Delete Course", "Edit Course");
+        List<String> list = Arrays.asList("Add Course", "Delete Course", "Edit Course");
 
         if ("admin".equals(currentUser.getUsername())) {
             adminMenu();
@@ -103,7 +103,7 @@ public class EmployeeConsole extends PersonConsole<Employee, EmployeeService> {
 
     private void saveEmployee() {
         Employee employee = save();
-        if (Application.confirmMenu("Save employee") > 0) {
+        if (employee != null && Application.confirmMenu("Save employee") > 0) {
             System.out.println(service.save(employee) != null ?
                     "Employee saved successfully." :
                     "Failed to save employee!");
@@ -112,7 +112,9 @@ public class EmployeeConsole extends PersonConsole<Employee, EmployeeService> {
 
     @Override
     public Employee save() {
-        return super.save().setSalary(Screen.getLong("Salary: "));
+        Employee employee = super.save();
+        return employee == null ? null
+                : employee.setSalary(Screen.getLong("Salary: "));
     }
 
     public Employee select(String message) {
@@ -157,7 +159,7 @@ public class EmployeeConsole extends PersonConsole<Employee, EmployeeService> {
 
         String lastname = Screen.getString("Enter - or new lastname: ");
         if (Application.isForUpdate(lastname))
-            employee.setFirstname(lastname);
+            employee.setLastname(lastname);
 
         long nationalCode = Screen.getLong("Enter -1 or new national code: ");
         if (nationalCode >= 0)
