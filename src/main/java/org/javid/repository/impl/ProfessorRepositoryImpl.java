@@ -2,6 +2,7 @@ package org.javid.repository.impl;
 
 import lombok.NonNull;
 import org.javid.connection.PostgresConnection;
+import org.javid.model.Course;
 import org.javid.model.Professor;
 import org.javid.repository.ProfessorRepository;
 import org.javid.repository.base.CrudRepositoryImpl;
@@ -162,5 +163,19 @@ public class ProfessorRepositoryImpl extends CrudRepositoryImpl<Professor, Integ
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public void saveProfessorCourse(Professor professor, Course course, int termNumber) {
+        String query = "INSERT INTO professor_course(professorId, courseId, termNumber)"
+                + "\n VALUES (?, ?, ?);";
+        try (PreparedStatement statement = getPreparedStatement(query)) {
+            statement.setInt(1, professor.getId());
+            statement.setInt(2, course.getId());
+            statement.setInt(3, termNumber);
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
