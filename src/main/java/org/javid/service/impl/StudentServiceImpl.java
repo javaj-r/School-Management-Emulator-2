@@ -1,6 +1,7 @@
 package org.javid.service.impl;
 
 import lombok.NonNull;
+import org.javid.model.Course;
 import org.javid.model.Student;
 import org.javid.repository.StudentRepository;
 import org.javid.service.StudentService;
@@ -25,5 +26,10 @@ public class StudentServiceImpl extends BaseServiceImpl<Student, Integer, Studen
     @Override
     public Integer save(Student entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    public void saveStudentCourse(Student student, Course course) {
+        repository.saveStudentCourse(student, course);
     }
 }
