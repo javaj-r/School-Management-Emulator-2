@@ -25,7 +25,6 @@ public class Student extends Person {
     private int termNumber;
     // Map<termNumber, Map<Course, score>>
     private Map<Integer, Map<Course, Integer>> courses = new HashMap<>();
-//    private Map<Course, Integer> lastTermCourses = new HashMap<>();
 
     @Override
     public Student setId(Integer integer) {
@@ -69,38 +68,10 @@ public class Student extends Person {
         return this;
     }
 
-//    public int getLastTermAVG() {
-//        int sum = 0;
-//        for (Integer score : lastTermCourses.values()) {
-//            sum += score;
-//        }
-//        return sum / lastTermCourses.size();
-//    }
-
-//    public int getCurrentUnits() {
-//        int sum = 0;
-//        for (Course course : courses.keySet()) {
-//            sum += course.getUnit();
-//        }
-//        return sum;
-//    }
-
-//    public int getUnitsLimit() {
-//        if (this.lastTermCourses.size() == 0 || getLastTermAVG() >= 18) {
-//            return 24;
-//        }
-//
-//        return 20;
-//    }
-
-//    public boolean isPassed(Course course) {
-//        return lastTermCourses.containsKey(course);
-//    }
-
-
     @Override
     public String toString() {
         return "[ studentCode:" + getStudentCode() +
+                ", termNumber:" + termNumber +
                 ", username:" + super.getUsername() +
                 ", password:" + super.getPassword() +
                 ", firstName:" + super.getFirstname() +
