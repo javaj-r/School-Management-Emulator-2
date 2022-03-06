@@ -4,22 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.javid.model.base.Person;
-import org.javid.model.enums.Permit;
 
-import java.util.*;
-
-import static org.javid.model.enums.Permit.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @Setter
 @Accessors(chain = true)
 public class Student extends Person {
-
-    private static final Set<Permit> STUDENT_PERMITTs =  new HashSet<>(Arrays.asList(
-            GET_STUDENT_I
-            , READ_COURSE
-            , REGISTER_COURSE
-    ));
 
     private Integer studentCode;
     private int termNumber;
@@ -41,12 +33,6 @@ public class Student extends Person {
     @Override
     public Student setPassword(String password) {
         super.setPassword(password);
-        return this;
-    }
-
-    @Override
-    public Student setPermissions(Set<Permit> permissions) {
-        super.setPermissions(permissions);
         return this;
     }
 

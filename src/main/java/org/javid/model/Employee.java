@@ -4,39 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.javid.model.base.Person;
-import org.javid.model.enums.Permit;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.javid.model.enums.Permit.*;
 
 @Getter
 @Setter
 @Accessors(chain = true)
 public class Employee extends Person {
-    private static final Set<Permit> EMPLOYEE_PERMITTs = new HashSet<>(Arrays.asList(
-                    CREATE_STUDENT
-                    , DELETE_STUDENT
-                    , READ_STUDENT
-                    , UPDATE_STUDENT
-
-                    , CREATE_PROFESSOR
-                    , DELETE_PROFESSOR
-                    , READ_PROFESSOR
-                    , UPDATE_PROFESSOR
-
-                    , CREATE_EMPLOYEE
-                    , DELETE_EMPLOYEE
-                    , READ_EMPLOYEE
-                    , UPDATE_EMPLOYEE
-
-                    , CREATE_COURSE
-                    , DELETE_COURSE
-                    , READ_COURSE
-                    , UPDATE_COURSE
-            ));
 
     private Long salary;
 
@@ -55,12 +27,6 @@ public class Employee extends Person {
     @Override
     public Employee setPassword(String password) {
         super.setPassword(password);
-        return this;
-    }
-
-    @Override
-    public Employee setPermissions(Set<Permit> permissions) {
-        super.setPermissions(permissions);
         return this;
     }
 
