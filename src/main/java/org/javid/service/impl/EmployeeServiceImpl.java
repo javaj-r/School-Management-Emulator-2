@@ -4,26 +4,11 @@ import lombok.NonNull;
 import org.javid.model.Employee;
 import org.javid.repository.EmployeeRepository;
 import org.javid.service.EmployeeService;
-import org.javid.service.base.BaseServiceImpl;
+import org.javid.service.base.UserServiceImpl;
 
-public class EmployeeServiceImpl extends BaseServiceImpl<Employee, Integer, EmployeeRepository> implements EmployeeService {
+public class EmployeeServiceImpl extends UserServiceImpl<Employee, EmployeeRepository> implements EmployeeService {
 
     public EmployeeServiceImpl(@NonNull EmployeeRepository repository) {
         super(repository);
-    }
-
-    @Override
-    public Employee findByUsername(Employee entity) {
-        return repository.findByUsername(entity);
-    }
-
-    @Override
-    public Employee findByUsernameAndPassword(Employee entity) {
-        return repository.findByUsernameAndPassword(entity);
-    }
-
-    @Override
-    public Integer save(Employee entity) {
-        return repository.save(entity);
     }
 }
