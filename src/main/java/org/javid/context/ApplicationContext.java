@@ -1,11 +1,14 @@
 package org.javid.context;
 
-
-import org.javid.connection.PostgresConnection;
 import org.javid.console.CourseConsole;
 import org.javid.console.EmployeeConsole;
 import org.javid.console.ProfessorConsole;
 import org.javid.console.StudentConsole;
+import org.javid.database.JpaEntityManagerFactory;
+import org.javid.model.Course;
+import org.javid.model.Employee;
+import org.javid.model.Professor;
+import org.javid.model.Student;
 import org.javid.repository.CourseRepository;
 import org.javid.repository.EmployeeRepository;
 import org.javid.repository.ProfessorRepository;
@@ -23,10 +26,12 @@ import org.javid.service.impl.EmployeeServiceImpl;
 import org.javid.service.impl.ProfessorServiceImpl;
 import org.javid.service.impl.StudentServiceImpl;
 
+import javax.persistence.EntityManagerFactory;
+
 public class ApplicationContext {
 
-    private static PostgresConnection getPostgresConnection() {
-        return PostgresConnection.getInstance();
+    private static EntityManagerFactory getEntityManagerFactory() {
+        return JpaEntityManagerFactory.getInstance();
     }
 
     public static CourseService getCourseService() {
@@ -34,7 +39,7 @@ public class ApplicationContext {
     }
 
     private static CourseRepository getCourseRepository() {
-        return new CourseRepositoryImpl(getPostgresConnection());
+        return new CourseRepositoryImpl(getEntityManagerFactory(), Course.class);
     }
 
     public static EmployeeService getEmployeeService() {
@@ -42,7 +47,7 @@ public class ApplicationContext {
     }
 
     public static EmployeeRepository getEmployeeRepository() {
-        return new EmployeeRepositoryImpl(getPostgresConnection());
+        return new EmployeeRepositoryImpl(getEntityManagerFactory(), Employee.class);
     }
 
     public static ProfessorService getProfessorService() {
@@ -50,7 +55,7 @@ public class ApplicationContext {
     }
 
     private static ProfessorRepository getProfessorRepository() {
-        return new ProfessorRepositoryImpl(getPostgresConnection());
+        return new ProfessorRepositoryImpl(getEntityManagerFactory(), Professor.class);
     }
 
     public static StudentService getStudentService() {
@@ -58,7 +63,7 @@ public class ApplicationContext {
     }
 
     private static StudentRepository getStudentRepository() {
-        return new StudentRepositoryImpl(getPostgresConnection());
+        return new StudentRepositoryImpl(getEntityManagerFactory(), Student.class);
     }
 
     public static EmployeeConsole getEmployeeConsole() {
