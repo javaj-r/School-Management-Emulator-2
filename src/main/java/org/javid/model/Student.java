@@ -5,18 +5,22 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.javid.model.base.Person;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @Accessors(chain = true)
+@Entity
+@DiscriminatorValue("3")
 public class Student extends Person {
 
     private Integer studentCode;
     private int termNumber;
-    // Map<termNumber, Map<Course, score>>
-    private Map<Integer, Map<Course, Integer>> courses = new HashMap<>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private Set<StudentTerm> terms = new HashSet<>();
 
     @Override
     public Student setId(Integer integer) {
@@ -65,5 +69,4 @@ public class Student extends Person {
                 ", nationalCode:" + super.getNationalCode() +
                 " ]";
     }
-
 }

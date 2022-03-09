@@ -5,9 +5,14 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.javid.model.base.Person;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
 @Getter
 @Setter
 @Accessors(chain = true)
+@Entity
+@DiscriminatorValue("1")
 public class Employee extends Person {
 
     private Long salary;
@@ -57,6 +62,5 @@ public class Employee extends Person {
                 ", nationalCode:" + super.getNationalCode() +
                 ", salary:" + getSalary() +
                 " ]";
-
     }
 }

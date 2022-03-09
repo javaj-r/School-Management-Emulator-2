@@ -1,22 +1,31 @@
 package org.javid.model;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.javid.model.base.Person;
 
-import java.util.HashMap;
+import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Professor extends Employee {
+@Entity
+@DiscriminatorValue("2")
+public class Professor extends Person {
 
+    @Transient
     private static long salaryPerCourse = 1_000_000L;
+    @Transient
     private static long facultyMemberFee = 5_000_000L;
+
     private boolean facultyMember;
-    private HashMap<Integer, Set<Course>> courses = new HashMap<>();
+    private int termNumber;
+
+    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)
+    private Set<ProfessorTerm> terms = new HashSet<>();
 
     @Override
     public Professor setId(Integer integer) {
@@ -54,28 +63,22 @@ public class Professor extends Employee {
         return this;
     }
 
-    @Override
-    public Professor setSalary(Long salary) {
-        super.setSalary(salary);
-        return this;
-    }
-
     public Long getSalary(int termNumber) {
         long salary = 0;
-        if (courses.containsKey(termNumber)) {
-            salary = salaryPerCourse * getTermUnits(courses.get(termNumber));
-            if (isFacultyMember())
-                salary += facultyMemberFee;
-        }
+        var sum = terms.stream()
+                .filter(professorTerm -> professorTerm.getTermNumber().equals(termNumber))
+                .map(ProfessorTerm::getCourses)
+                .flatMap(Set::stream)
+                .mapToInt(Course::getUnit)
+                .sum();
+
+        salary = sum * salaryPerCourse;
+
+        if (isFacultyMember())
+            salary += facultyMemberFee;
+
         return salary;
     }
-
-    private int getTermUnits(Set<Course> termCourses) {
-        int[] units = new int[]{0};
-        termCourses.forEach(course -> units[0] += course.getUnit());
-        return units[0];
-    }
-
 
     @Override
     public String toString() {

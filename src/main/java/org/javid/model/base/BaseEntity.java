@@ -4,6 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -14,8 +19,11 @@ import java.util.Objects;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class BaseEntity<ID> {
+@MappedSuperclass
+public class BaseEntity<ID extends Serializable> {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private ID id;
 
     public boolean isNew() {
@@ -27,6 +35,8 @@ public class BaseEntity<ID> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BaseEntity<?> that = (BaseEntity<?>) o;
+        if (id == null && that.id == null)
+            return false;
         return Objects.equals(id, that.id);
     }
 

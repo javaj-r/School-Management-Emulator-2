@@ -5,19 +5,27 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.javid.model.base.BaseEntity;
 
-import java.util.HashSet;
-import java.util.Set;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 @Getter
 @Setter
 @Accessors(chain = true)
+@Entity
 public class Course extends BaseEntity<Integer> {
 
     private String name;
     private Integer unit;
+    private Integer score;
+
+    @ManyToOne
     private Professor professor;
+
+    @OneToOne
+    @JoinColumn(name = "requiredCourse")
     private Course requiredCourse;
-    private Set<Student> students = new HashSet<>();
 
     @Override
     public Course setId(Integer integer) {
