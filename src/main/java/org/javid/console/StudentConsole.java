@@ -2,14 +2,11 @@ package org.javid.console;
 
 import org.javid.Application;
 import org.javid.console.base.PersonConsole;
-import org.javid.model.Course;
-import org.javid.model.Student;
+import org.javid.model.*;
 import org.javid.service.StudentService;
 import org.javid.util.Screen;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StudentConsole extends PersonConsole<Student, StudentService> {
@@ -30,8 +27,8 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
     public void userMenu() {
         while (true) {
             try {
-                int choice = Screen.showMenu("Exit"
-                        , Arrays.asList("My Information", "Show Courses", "Select Course", "My Courses"));
+                var choice = Screen.showMenu("Exit"
+                        , List.of("My Information", "Show Courses", "Select Course", "My Courses"));
 
                 if (choice == 0)
                     break;
@@ -57,95 +54,110 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
     }
 
     private void selectCourse() {
-        courseConsole.fetchStudentCourses(currentUser);
-        Map<Integer, Map<Course, Integer>> courses = currentUser.getCourses();
-        int term = currentUser.getTermNumber();
-        Course course = courseConsole.select("Select a course for adding to your courses: ");
+        var course = courseConsole.select("Select a course for adding to your courses: ");
+        if (course == null)
+            return;
 
-        if (courses.containsKey(term)) {
-            if (courses.get(term).containsKey(course)) {
-                System.out.println("Already selected");
-                return;
-            }
-
-            if (term > 1) {
-                int[] currentUnits = new int[]{0};
-                courses.get(term).keySet().forEach(course1 -> currentUnits[0] += course1.getUnit());
-                if (course.getUnit() + currentUnits[0] > getPermeatedUnits(courses, term)) {
-                    System.out.println("Out of permeated units limit!");
-                    return;
-                }
-            }
+        var termNumber = currentUser.getTermNumber();
+        var terms = currentUser.getTerms();
+        var term = getTerm(currentUser, termNumber);
+        if (term == null) {
+            System.out.println("Term not found!");
+            return;
         }
 
-        if (isPassedCourse(courses, course)) {
+        var currentCourses = term.getCourses();
+        if (currentCourses.contains(course)) {
+            System.out.println("Already selected");
+            return;
+        }
+
+        if (termNumber > 1 && isOutOfUnitLimit(course, termNumber, currentUser, term))
+            return;
+
+
+        if (isPassedCourse(terms, course)) {
             System.out.println("You passed this course.");
             return;
         }
 
         if (course.getRequiredCourse() != null) {
-            if (term == 1 || !isPassedRequiredCourse(courses, course, term)) {
+            if (termNumber == 1 || !isPassedCourse(terms, course.getRequiredCourse())) {
                 System.out.println("Course hase required course that you didn't passed yet!");
                 return;
             }
         }
-
-        service.saveStudentCourse(currentUser, course);
+        currentCourses.add(course);
+        service.update(currentUser);
     }
 
-    private int getPermeatedUnits(Map<Integer, Map<Course, Integer>> courses, int currentTerm) {
-        if (currentTerm == 1)
-            return 24;
-
-        int[] scoreSum = new int[]{0};
-        courses.get(currentTerm - 1).values().forEach(score -> scoreSum[0] += score);
-        int avg = (scoreSum[0] / courses.get(currentTerm - 1).size());
-        return avg >= 18 ? 24 : 20;
+    private StudentTerm getTerm(Student student, int termNumber) {
+        return student.getTerms()
+                .stream()
+                .filter(t -> t.getTermNumber().equals(termNumber))
+                .findFirst()
+                .orElse(null);
     }
 
-    private boolean isPassedRequiredCourse(Map<Integer, Map<Course, Integer>> courses, Course course, int term) {
-        Map<Integer, Map<Course, Integer>> passedCourses = courses.entrySet()
-                .stream().filter(integerMapEntry -> integerMapEntry.getKey() < term)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue));
-        return isPassedCourse(passedCourses, course);
-    }
-
-
-    private boolean isPassedCourse(Map<Integer, Map<Course, Integer>> courses, Course course) {
-        for (Map<Course, Integer> map : courses.values()) {
-            for (Map.Entry<Course, Integer> entry : map.entrySet()) {
-                if (course.equals(entry.getKey()) && entry.getValue() > 10) {
-                    return true;
-                }
-            }
+    private boolean isOutOfUnitLimit(Course course, int termNumber, Student student, StudentTerm currentTerm) {
+        var sum = currentTerm.getCourses()
+                .stream()
+                .mapToInt(Course::getUnit)
+                .sum();
+        if (course.getUnit() + sum > getPermeatedUnits(student, termNumber)) {
+            System.out.println("Out of permeated units limit!");
+            return true;
         }
         return false;
     }
 
-    public void showStudentCourses() {
-        courseConsole.fetchStudentCourses(currentUser);
-        currentUser.getCourses()
-                .entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .forEach(entry ->
-                        entry.getValue()
-                                .forEach((course, score) ->
-                                        printStudentCourse(entry.getKey(), course, score)
-                                ));
+    private int getPermeatedUnits(Student student, int currentTerm) {
+        if (currentTerm == 1)
+            return 24;
+
+        var lastTerm = getTerm(student, currentTerm - 1);
+        if (lastTerm == null) {
+            System.out.println("Term not found!");
+            return 20;
+        }
+
+        var avg = lastTerm.getCourses().stream()
+                .mapToInt(Course::getScore)
+                .average()
+                .orElse(0);
+
+        return avg >= 18 ? 24 : 20;
     }
 
-    private void printStudentCourse(Integer termNumber, Course course, Integer score) {
+    private boolean isPassedCourse(Set<StudentTerm> terms, Course course) {
+        return terms.stream()
+                .map(Term::getCourses)
+                .flatMap(Set::stream)
+                .filter(course1 -> Objects.equals(course1.getId(), course.getId()))
+                .filter(course1 -> course1.getScore() != null)
+                .anyMatch(course1 -> course1.getScore() >= 10);
+    }
+
+    public void showStudentCourses() {
+        currentUser.getTerms()
+                .stream()
+                .sorted(Comparator.comparing(Term::getTermNumber))
+                .forEach(st -> st.getCourses()
+                        .forEach(course -> printStudentCourse(st.getTermNumber()
+                                , course)
+                        ));
+    }
+
+    private void printStudentCourse(Integer termNumber, Course course) {
         System.out.println("[ Term:" + termNumber +
                 ", Course: " + course.getName() +
-                ", Score:" + score + " ]");
+                ", Score:" + course.getScore() + " ]");
     }
 
     public void manage() {
         while (true) {
             try {
-                int choice = Screen.showMenu("Exit", Arrays.asList("Add Student", "Delete Student", "Edit Student"));
+                var choice = Screen.showMenu("Exit", List.of("Add Student", "Delete Student", "Edit Student"));
 
                 if (choice == 0)
                     break;
@@ -168,75 +180,58 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
     }
 
     private void saveStudent() {
-        Student student = save();
+        var student = save();
         if (student != null && Application.confirmMenu("Save Student") > 0) {
-            System.out.println(service.save(student) != null ?
-                    "Student saved successfully." :
-                    "Failed to save student!");
+            service.save(student);
+            System.out.println(student.isNew() ?
+                    "Failed to save student!" :
+                    "Student saved successfully.");
         }
     }
 
     @Override
     public Student save() {
-        Student student = super.save();
-        return student == null ? null
-                : student.setStudentCode(Screen.getInt("Student code: "))
-                .setTermNumber(Math.max(1, Screen.getInt("Student term number [>= 1]: ")));
-    }
+        var student = super.save();
+        if (student == null)
+            return null;
 
-    public Student select(String message) {
-        return select(message, service.findAll());
-    }
+        var term = new StudentTerm()
+                .setTermNumber(1)
+                .setStudent(student);
 
-    public Student select(String message, List<Student> students) {
-        List<String> items = students.stream()
-                .map(Student::toString)
-                .collect(Collectors.toList());
+        student.getTerms().add(term);
 
-        int choice = Screen.showMenu(message, "Cancel", items);
-        if (choice == 0) {
-            return new Student();
-        }
-
-        return students.get(choice - 1);
+        return student
+                .setTermNumber(1)
+                .setStudentCode(Screen.getInt("Student code: "));
     }
 
     public void delete() {
-        Student student = select("Select student to delete: ");
-        if (student.isNew())
+        var student = select("Select student to delete: ");
+        if (student == null)
             return;
         service.deleteById(student.getId());
         System.out.println("Student deleted.");
     }
 
     private void update() {
-        Student student = select("Select student to update: ");
-        if (student.isNew())
+        var student = super.update("Select student to update: ");
+        if (student == null)
             return;
 
-        String password = Screen.getString("Enter - or new password: ");
-        if (Application.isForUpdate(password))
-            student.setPassword(password);
-
-        String firstname = Screen.getString("Enter - or new firstname: ");
-        if (Application.isForUpdate(firstname))
-            student.setFirstname(firstname);
-
-        String lastname = Screen.getString("Enter - or new lastname: ");
-        if (Application.isForUpdate(lastname))
-            student.setLastname(lastname);
-
-        long nationalCode = Screen.getLong("Enter -1 or new national code: ");
-        if (nationalCode >= 0)
-            student.setNationalCode(nationalCode);
-
-        int studentCode = Screen.getInt("Enter -1 or new student code: ");
+        var studentCode = Screen.getInt("Enter -1 or new student code: ");
         if (studentCode >= 0)
             student.setStudentCode(studentCode);
 
-        int termNumber = Screen.getInt("Enter 0 or new term number [>= 1]: ");
-        if (termNumber > 0)
-            student.setTermNumber(termNumber);
+        var choice = Screen.showMenu("New Term: ", "No", Collections.singletonList("Yes"));
+        if (choice != 0) {
+            student.setTermNumber(student.getTermNumber() + 1);
+            var term = new StudentTerm()
+                    .setTermNumber(student.getTermNumber())
+                    .setStudent(student);
+
+            student.getTerms().add(term);
+        }
 
         if (Application.confirmMenu("Save changes") > 0) {
             service.update(student);
@@ -244,25 +239,37 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
         }
     }
 
-    public void updateStudentCourseScore() {
-        Student student = select("Select Student: ");
-        Course course = courseConsole.select("Select Course: ");
-        int score = getScore();
+    public void updateStudentCourseScore(Professor professor) {
+        var student = select("Select Student: ");
+        if (student == null)
+            return;
+
+        var courses = student.getTerms().stream()
+                .filter(term -> term.getTermNumber().equals(student.getTermNumber()))
+                .map(Term::getCourses)
+                .flatMap(Set::stream)
+                .filter(course -> professor.equals(course.getProfessor()))
+                .collect(Collectors.toList());
+
+        var course = courseConsole.select("Select Course: ", courses);
+        if (course == null)
+            return;
+        var score = getScore();
         if (score == -1)
             return;
-        if (Application.confirmMenu("Save Student Score: ") > 0) {
-            service.updateStudentCourseScore(student, course, score);
-        }
+
+        course.setScore(score);
+        service.save(student);
     }
 
     private int getScore() {
-        boolean loopFlag = true;
+        var loopFlag = true;
         while (loopFlag) {
-            int score = Screen.getInt("Enter score: ");
+            var score = Screen.getInt("Enter score: ");
             if (score >= 0 && score <= 20)
                 return score;
 
-            int choice = tryAgainOrExit("Invalid score");
+            var choice = tryAgainOrExit("Invalid score");
             loopFlag = choice != 0;
         }
         return -1;

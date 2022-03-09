@@ -1,26 +1,23 @@
 package org.javid.console;
 
-import lombok.RequiredArgsConstructor;
 import org.javid.Application;
+import org.javid.console.base.BaseConsole;
 import org.javid.model.Course;
-import org.javid.model.Professor;
-import org.javid.model.Student;
 import org.javid.service.CourseService;
 import org.javid.util.Screen;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
-public class CourseConsole {
+public class CourseConsole extends BaseConsole<Course, Integer, CourseService> {
 
-    private final CourseService service;
+    public CourseConsole(CourseService service) {
+        super(service);
+    }
 
     public void manage() {
         while (true) {
             try {
-                int choice = Screen.showMenu("Exit", Arrays.asList("Add Course", "Delete Course", "Edit Course"));
+                var choice = Screen.showMenu("Exit", List.of("Add Course", "Delete Course", "Edit Course"));
 
                 if (choice == 0)
                     break;
@@ -43,15 +40,16 @@ public class CourseConsole {
     }
 
     private void save() {
-        Course course = new Course()
+        var course = new Course()
                 .setName(Screen.getString("Course name: "))
                 .setUnit(Math.max(1, Screen.getInt("Course unit [>= 1]: ")))
                 .setRequiredCourse(select("Select required course: "));
 
         if (Application.confirmMenu("Save Course") > 0) {
-            System.out.println(service.save(course) != null ?
-                    "Course saved successfully." :
-                    "Failed to save course!");
+            service.save(course);
+            System.out.println(course.isNew() ?
+                    "Failed to save course!" :
+                    "Course saved successfully.");
         }
     }
 
@@ -62,49 +60,24 @@ public class CourseConsole {
                 .forEach(System.out::println);
     }
 
-    public void fetchStudentCourses(Student student) {
-        service.findAllCoursesByStudentId(student);
-    }
-
-    public void fetchProfessorCourses(Professor professor) {
-        service.findAllCoursesByProfessorId(professor);
-    }
-
-    public Course select(String message) {
-        return select(message, service.findAll());
-    }
-
-    public Course select(String message, List<Course> courses) {
-        List<String> items = courses.stream()
-                .map(Course::toString)
-                .collect(Collectors.toList());
-
-        int choice = Screen.showMenu(message, "Cancel", items);
-        if (choice == 0) {
-            return new Course();
-        }
-
-        return courses.get(choice - 1);
-    }
-
     public void delete() {
-        Course course = select("Select course to delete: ");
-        if (course.isNew())
+        var course = select("Select course to delete: ");
+        if (course == null)
             return;
         service.deleteById(course.getId());
         System.out.println("Course deleted.");
     }
 
     private void update() {
-        Course course = select("Select course to update: ");
-        if (course.isNew())
+        var course = select("Select course to update: ");
+        if (course == null)
             return;
 
-        String name = Screen.getString("Enter - or new name: ");
+        var name = Screen.getString("Enter - or new name: ");
         if (Application.isForUpdate(name))
             course.setName(name);
 
-        int unit = Screen.getInt("Enter 0 or new unit: ");
+        var unit = Screen.getInt("Enter 0 or new unit: ");
         if (unit >= 0)
             course.setUnit(unit);
 

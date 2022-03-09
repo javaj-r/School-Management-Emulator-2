@@ -2,13 +2,13 @@ package org.javid.console;
 
 import org.javid.Application;
 import org.javid.console.base.PersonConsole;
-import org.javid.model.Course;
 import org.javid.model.Professor;
+import org.javid.model.ProfessorTerm;
 import org.javid.service.ProfessorService;
 import org.javid.util.Screen;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
 
 public class ProfessorConsole extends PersonConsole<Professor, ProfessorService> {
 
@@ -31,7 +31,7 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
         while (true) {
             try {
                 int choice = Screen.showMenu("Exit"
-                        , Arrays.asList("My Information", "Score Students", "See salary"));
+                        , List.of("My Information", "Score Students", "See salary"));
 
                 if (choice == 0)
                     break;
@@ -41,7 +41,7 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
                         System.out.println(currentUser.toString());
                         break;
                     case 2:
-                        studentConsole.updateStudentCourseScore();
+                        studentConsole.updateStudentCourseScore(currentUser);
                         break;
                     case 3:
                         printSalary();
@@ -54,7 +54,6 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
     }
 
     private void printSalary() {
-        courseConsole.fetchProfessorCourses(currentUser);
         int term = Screen.getInt("Enter term number: ");
         System.out.println(currentUser.getSalary(term));
     }
@@ -62,7 +61,7 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
     public void manage() {
         while (true) {
             try {
-                int choice = Screen.showMenu("Exit", Arrays.asList("Add Professor", "Delete Professor"
+                int choice = Screen.showMenu("Exit", List.of("Add Professor", "Delete Professor"
                         , "Edit Professor", "Select Course For Professor"));
 
                 if (choice == 0)
@@ -89,95 +88,92 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
     }
 
     private void addProfessorCourse() {
-        Professor professor = select("Select professor: ");
-        courseConsole.fetchProfessorCourses(professor);
-        HashMap<Integer, Set<Course>> courses = professor.getCourses();
-        int term = Screen.getInt("Enter Term Number: ");
-        Course course = courseConsole.select("Select course: ");
+        var course = courseConsole.select("Select course: ");
+        if (course == null)
+            return;
 
-        if (courses.containsKey(term)) {
-            if (courses.get(term).contains(course)) {
-                System.out.println("Already added");
-                return;
-            }
+        var professor = select("Select professor: ");
+        if (professor == null)
+            return;
+
+        var termNumber = professor.getTermNumber();
+        var terms = professor.getTerms();
+        var term = terms.stream()
+                .filter(t -> t.getTermNumber().equals(termNumber))
+                .findFirst()
+                .orElse(null);
+
+        if (term == null) {
+            System.out.println("Term not found!");
+            return;
         }
 
-        service.saveProfessorCourse(professor, course, term);
+        var currentCourses = term.getCourses();
+
+        if (currentCourses.contains(course)) {
+            System.out.println("Already selected");
+            return;
+        }
+
+        currentCourses.add(course);
+        service.update(professor);
     }
 
     private void saveProfessor() {
-        Professor professor = save();
+        var professor = save();
         if (professor != null && Application.confirmMenu("Save professor") > 0) {
-            System.out.println(service.save(professor) != null ?
-                    "Professor saved successfully." :
-                    "Failed to save professor!");
+            service.save(professor);
+            System.out.println(professor.isNew() ?
+                    "Failed to save professor!" :
+                    "Professor saved successfully.");
         }
     }
 
     @Override
     public Professor save() {
-        Professor professor = super.save();
+        var professor = super.save();
         if (professor == null)
             return null;
 
-        professor.setSalary(Screen.getLong("Salary: "));
-        int choice = Screen.showMenu("Faculty member: ", "No", Collections.singletonList("Yes"));
-        return professor.setFacultyMember(choice == 1);
-    }
+        var term = new ProfessorTerm()
+                .setTermNumber(1)
+                .setProfessor(professor);
+        professor.getTerms().add(term);
+        var choice = Screen.showMenu("Faculty member: "
+                , "No", Collections.singletonList("Yes"));
 
-    public Professor select(String message) {
-        return select(message, service.findAll());
-    }
-
-    public Professor select(String message, List<Professor> professors) {
-        List<String> items = professors.stream()
-                .map(Professor::toString)
-                .collect(Collectors.toList());
-
-        int choice = Screen.showMenu(message, "Cancel", items);
-        if (choice == 0) {
-            return new Professor();
-        }
-
-        return professors.get(choice - 1);
+        return professor
+                .setTermNumber(1)
+                .setFacultyMember(choice == 1);
     }
 
     public void delete() {
-        Professor professor = select("Select professor to delete: ");
-        if (professor.isNew())
+        var professor = select("Select professor to delete: ");
+        if (professor == null)
             return;
         service.deleteById(professor.getId());
         System.out.println("Professor deleted.");
     }
 
     private void update() {
-        Professor professor = select("Select professor to update: ");
-        if (professor.isNew())
+        var professor = super.update("Select professor to update: ");
+        if (professor == null)
             return;
 
-        String password = Screen.getString("Enter - or new password: ");
-        if (Application.isForUpdate(password))
-            professor.setPassword(password);
-
-        String firstname = Screen.getString("Enter - or new firstname: ");
-        if (Application.isForUpdate(firstname))
-            professor.setFirstname(firstname);
-
-        String lastname = Screen.getString("Enter - or new lastname: ");
-        if (Application.isForUpdate(lastname))
-            professor.setLastname(lastname);
-
-        long nationalCode = Screen.getLong("Enter -1 or new national code: ");
-        if (nationalCode >= 0)
-            professor.setNationalCode(nationalCode);
-
-        long salary = Screen.getLong("Enter -1 or new salary: ");
-        if (salary >= 0)
-            professor.setSalary(salary);
-
-        int choice = Screen.showMenu("Faculty member: ", "Cancel", Arrays.asList("Yes", "No"));
+        var choice = Screen.showMenu("Faculty member: ", "Cancel", List.of("Yes", "No"));
         if (choice != 0)
             professor.setFacultyMember(choice == 1);
+
+        choice = Screen.showMenu("New Term: "
+                , "No", Collections.singletonList("Yes"));
+        if (choice != 0) {
+            professor.setTermNumber(professor.getTermNumber() + 1);
+            var term = new ProfessorTerm()
+                    .setTermNumber(professor.getTermNumber())
+                    .setProfessor(professor);
+
+            professor.getTerms().add(term);
+        }
 
         if (Application.confirmMenu("Save changes") > 0) {
             service.update(professor);

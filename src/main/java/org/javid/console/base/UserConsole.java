@@ -1,22 +1,22 @@
 package org.javid.console.base;
 
 import org.javid.model.base.User;
+import org.javid.service.base.BaseService;
 import org.javid.service.base.UserService;
 import org.javid.util.Screen;
 
 import java.util.Collections;
 
-public abstract class UserConsole<T extends User, S extends UserService<T>> {
+public abstract class UserConsole<T extends User, S extends UserService<T> & BaseService<T, Integer>> extends BaseConsole<T, Integer, S> {
 
-    protected final S service;
     protected T currentUser;
 
     public UserConsole(S service) {
-        this.service = service;
+        super(service);
     }
 
     public void login() {
-        boolean loopFlag = true;
+        var loopFlag = true;
 
         while (loopFlag) {
             T user = getNewInstance();
