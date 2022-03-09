@@ -4,8 +4,8 @@ import org.javid.context.ApplicationContext;
 import org.javid.model.Employee;
 import org.javid.util.Screen;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class Application {
 
@@ -19,7 +19,7 @@ public class Application {
         while (true) {
             try {
                 int choice = Screen.showMenu("Exit"
-                        , Arrays.asList("Employee login", "Professor login", "Student login"));
+                        , List.of("Employee login", "Professor login", "Student login"));
 
                 if (choice == 0)
                     break;
@@ -42,11 +42,12 @@ public class Application {
     }
 
     private static void createAdmin() {
-        ApplicationContext
-                .getEmployeeRepository()
-                .save(new Employee()
-                        .setUsername("admin")
-                        .setPassword("admin"));
+        var service = ApplicationContext
+                .getEmployeeService();
+        if (service.findByUsername(new Employee().setUsername("admin")) == null)
+            service.save(new Employee()
+                    .setUsername("admin")
+                    .setPassword("admin"));
     }
 
 
