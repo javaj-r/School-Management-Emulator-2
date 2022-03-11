@@ -141,9 +141,7 @@ public class EmployeeConsole extends PersonConsole<Employee, EmployeeService> {
         if (salary >= 0)
             employee.setSalary(salary);
 
-        if (Application.confirmMenu("Save changes") > 0) {
-            service.update(employee);
-            System.out.println("Employee updated successfully.");
-        }
+        service.update(employee);
+        System.out.println("Employee updated successfully.");
     }
 }
