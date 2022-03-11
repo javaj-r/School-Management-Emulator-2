@@ -33,9 +33,7 @@ public abstract class CrudRepositoryImpl<T extends BaseEntity<ID>, ID extends Se
     @Override
     public T findById(ID id) {
         var em = getManager();
-        var t = em.find(tClass, id);
-        em.detach(t);
-        return t;
+        return em.find(tClass, id);
     }
 
     @Override
