@@ -66,7 +66,10 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
             return;
         }
 
-        var currentCourses = term.getCourses();
+        var currentCourses = term.getTermCourses()
+                .stream()
+                .map(TermCourse::getCourse)
+                .collect(Collectors.toList());
         if (currentCourses.contains(course)) {
             System.out.println("Already selected");
             return;
@@ -74,7 +77,6 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
 
         if (termNumber > 1 && isOutOfUnitLimit(course, termNumber, currentUser, term))
             return;
-
 
         if (isPassedCourse(terms, course)) {
             System.out.println("You passed this course.");
@@ -87,7 +89,11 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
                 return;
             }
         }
-        currentCourses.add(course);
+
+        term.getTermCourses()
+                .add(new TermCourse()
+                        .setCourse(course)
+                        .setTerm(term));
         service.update(currentUser);
     }
 
@@ -100,8 +106,9 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
     }
 
     private boolean isOutOfUnitLimit(Course course, int termNumber, Student student, StudentTerm currentTerm) {
-        var sum = currentTerm.getCourses()
+        var sum = currentTerm.getTermCourses()
                 .stream()
+                .map(TermCourse::getCourse)
                 .mapToInt(Course::getUnit)
                 .sum();
         if (course.getUnit() + sum > getPermeatedUnits(student, termNumber)) {
@@ -121,8 +128,8 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
             return 20;
         }
 
-        var avg = lastTerm.getCourses().stream()
-                .mapToInt(Course::getScore)
+        var avg = lastTerm.getTermCourses().stream()
+                .mapToInt(TermCourse::getScore)
                 .average()
                 .orElse(0);
 
@@ -131,27 +138,27 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
 
     private boolean isPassedCourse(Set<StudentTerm> terms, Course course) {
         return terms.stream()
-                .map(Term::getCourses)
+                .map(Term::getTermCourses)
                 .flatMap(Set::stream)
-                .filter(course1 -> Objects.equals(course1.getId(), course.getId()))
-                .filter(course1 -> course1.getScore() != null)
-                .anyMatch(course1 -> course1.getScore() >= 10);
+                .filter(tc -> Objects.equals(tc.getCourse().getId(), course.getId()))
+                .filter(tc -> tc.getScore() != null)
+                .anyMatch(tc -> tc.getScore() >= 10);
     }
 
     public void showStudentCourses() {
         currentUser.getTerms()
                 .stream()
                 .sorted(Comparator.comparing(Term::getTermNumber))
-                .forEach(st -> st.getCourses()
-                        .forEach(course -> printStudentCourse(st.getTermNumber()
-                                , course)
+                .forEach(st -> st.getTermCourses()
+                        .forEach(tc -> printStudentCourse(st.getTermNumber()
+                                , tc.getCourse(), tc.getScore())
                         ));
     }
 
-    private void printStudentCourse(Integer termNumber, Course course) {
+    private void printStudentCourse(Integer termNumber, Course course, Integer score) {
         System.out.println("[ Term:" + termNumber +
                 ", Course: " + course.getName() +
-                ", Score:" + course.getScore() + " ]");
+                ", Score:" + score + " ]");
     }
 
     public void manage() {
@@ -233,32 +240,22 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
             student.getTerms().add(term);
         }
 
-        if (Application.confirmMenu("Save changes") > 0) {
-            service.update(student);
-            System.out.println("Student updated successfully.");
-        }
+        service.update(student);
+        System.out.println("Student updated successfully.");
     }
 
     public void updateStudentCourseScore(Professor professor) {
         var student = select("Select Student: ");
         if (student == null)
             return;
-
-        var courses = student.getTerms().stream()
-                .filter(term -> term.getTermNumber().equals(student.getTermNumber()))
-                .map(Term::getCourses)
-                .flatMap(Set::stream)
-                .filter(course -> professor.equals(course.getProfessor()))
-                .collect(Collectors.toList());
-
-        var course = courseConsole.select("Select Course: ", courses);
-        if (course == null)
+        var termCourse = selectTermCourse("Select Course: ", student, professor);
+        if (termCourse == null)
             return;
         var score = getScore();
         if (score == -1)
             return;
 
-        course.setScore(score);
+        termCourse.setScore(score);
         service.save(student);
     }
 
@@ -273,5 +270,23 @@ public class StudentConsole extends PersonConsole<Student, StudentService> {
             loopFlag = choice != 0;
         }
         return -1;
+    }
+
+    public TermCourse selectTermCourse(String message, Student student, Professor professor) {
+        var termCourses = student.getTerms().stream()
+                .filter(term -> term.getTermNumber().equals(student.getTermNumber()))
+                .map(Term::getTermCourses)
+                .flatMap(Set::stream)
+                .filter(ts -> professor.equals(ts.getCourse().getProfessor()))
+                .collect(Collectors.toList());
+        var items = termCourses.stream()
+                .map(TermCourse::getCourse)
+                .map(Course::toString)
+                .collect(Collectors.toList());
+        var choice = Screen.showMenu(message, "Cancel", items);
+        if (choice == 0)
+            return null;
+
+        return termCourses.get(choice - 1);
     }
 }
