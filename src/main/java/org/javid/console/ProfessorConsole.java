@@ -4,6 +4,7 @@ import org.javid.Application;
 import org.javid.console.base.PersonConsole;
 import org.javid.model.Professor;
 import org.javid.model.ProfessorTerm;
+import org.javid.model.TermCourse;
 import org.javid.service.ProfessorService;
 import org.javid.util.Screen;
 
@@ -88,14 +89,17 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
     }
 
     private void addProfessorCourse() {
-        var course = courseConsole.select("Select course: ");
-        if (course == null)
-            return;
-
         var professor = select("Select professor: ");
         if (professor == null)
             return;
-
+        var course = courseConsole.select("Select course: ");
+        if (course == null)
+            return;
+        if (course.getProfessor() != null) {
+            var check = course.getProfessor().equals(professor);
+            System.out.println(check ? "Already selected" : "Selected for other professor");
+            return;
+        }
         var termNumber = professor.getTermNumber();
         var terms = professor.getTerms();
         var term = terms.stream()
@@ -108,14 +112,12 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
             return;
         }
 
-        var currentCourses = term.getCourses();
-
-        if (currentCourses.contains(course)) {
-            System.out.println("Already selected");
-            return;
-        }
-
-        currentCourses.add(course);
+        course.setProfessor(professor);
+        term.getTermCourses()
+                .add(new TermCourse()
+                        .setCourse(course)
+                        .setTerm(term));
+        courseConsole.update(course);
         service.update(professor);
     }
 
@@ -175,9 +177,7 @@ public class ProfessorConsole extends PersonConsole<Professor, ProfessorService>
             professor.getTerms().add(term);
         }
 
-        if (Application.confirmMenu("Save changes") > 0) {
-            service.update(professor);
-            System.out.println("Professor updated successfully.");
-        }
+        service.update(professor);
+        System.out.println("Professor updated successfully.");
     }
 }
