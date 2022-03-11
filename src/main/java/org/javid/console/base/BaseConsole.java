@@ -5,10 +5,11 @@ import org.javid.service.base.BaseService;
 import org.javid.util.Screen;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class BaseConsole<T extends BaseEntity<ID>, ID extends Serializable, S extends BaseService<T, ID>> {
+public abstract class BaseConsole<T extends BaseEntity<ID>, ID extends Serializable & Comparable<ID>, S extends BaseService<T, ID>> {
 
     protected final S service;
 
@@ -17,19 +18,23 @@ public abstract class BaseConsole<T extends BaseEntity<ID>, ID extends Serializa
     }
 
     public T select(String message) {
-        return select(message, service.findAll());
+        var entities = service.findAll()
+                .stream()
+                .sorted(Comparator.comparing(BaseEntity::getId))
+                .collect(Collectors.toList());
+        return select(message, entities);
     }
 
-    public T select(String message, List<T> courses) {
-        var items = courses.stream()
+    public T select(String message, List<T> entities) {
+        var items = entities
+                .stream()
                 .map(T::toString)
                 .collect(Collectors.toList());
 
         var choice = Screen.showMenu(message, "Cancel", items);
-        if (choice == 0) {
+        if (choice == 0)
             return null;
-        }
 
-        return service.findById(courses.get(choice - 1).getId());
+        return entities.get(choice - 1);
     }
 }
