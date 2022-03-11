@@ -26,10 +26,7 @@ public class Term extends BaseEntity<Integer> {
     @Column(nullable = false)
     private Integer termNumber;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "term_course",
-            joinColumns = @JoinColumn(name = "term_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id"))
-    private Set<Course> courses = new HashSet<>();
+    @OneToMany(mappedBy = "term", cascade = CascadeType.ALL)
+    private Set<TermCourse> termCourses = new HashSet<>();
 
 }

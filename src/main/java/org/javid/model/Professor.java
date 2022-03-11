@@ -64,20 +64,16 @@ public class Professor extends Person {
     }
 
     public Long getSalary(int termNumber) {
-        long salary = 0;
         var sum = terms.stream()
                 .filter(professorTerm -> professorTerm.getTermNumber().equals(termNumber))
-                .map(ProfessorTerm::getCourses)
+                .map(ProfessorTerm::getTermCourses)
                 .flatMap(Set::stream)
+                .map(TermCourse::getCourse)
                 .mapToInt(Course::getUnit)
                 .sum();
+        long salary = sum * salaryPerCourse;
 
-        salary = sum * salaryPerCourse;
-
-        if (isFacultyMember())
-            salary += facultyMemberFee;
-
-        return salary;
+        return facultyMember ? salary + facultyMemberFee : salary;
     }
 
     @Override

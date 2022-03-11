@@ -18,7 +18,6 @@ public class Course extends BaseEntity<Integer> {
 
     private String name;
     private Integer unit;
-    private Integer score;
 
     @ManyToOne
     private Professor professor;
@@ -37,7 +36,8 @@ public class Course extends BaseEntity<Integer> {
     public String toString() {
         return "[ codeName:" + getName() +
                 ", unit:" + unit +
-                ", requiredCourseId:" + (requiredCourse == null ? null : requiredCourse.getId()) +
+                ", requiredCourseId:" + (requiredCourse == null ? null : requiredCourse.getName()) +
+                ", Professor:" + (professor  == null ? null : professor.getFirstname() + " " + professor.getLastname()) +
                 " ]";
     }
 }
