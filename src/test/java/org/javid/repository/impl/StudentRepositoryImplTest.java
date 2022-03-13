@@ -1,7 +1,8 @@
 package org.javid.repository.impl;
 
 import org.javid.model.Professor;
-import org.javid.repository.ProfessorRepository;
+import org.javid.model.Student;
+import org.javid.repository.StudentRepository;
 import org.javid.repository.base.UserRepositoryImplTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,34 +10,32 @@ import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ProfessorRepositoryImplTest extends UserRepositoryImplTest<Professor, ProfessorRepository> {
+class StudentRepositoryImplTest extends UserRepositoryImplTest<Student, StudentRepository> {
 
     @BeforeEach
     void setUp() {
-        repository = new ProfessorRepositoryImpl(factory, Professor.class);
-        entity1 = new Professor()
+        repository = new StudentRepositoryImpl(factory, Student.class);
+        entity1 = new Student()
                 .setUsername("p1")
                 .setPassword("123")
                 .setFirstname("fName1")
                 .setLastname("lName1")
                 .setNationalCode(123L)
-                .setFacultyMember(false)
                 .setTermNumber(1);
 
-        entity2 = new Professor()
+        entity2 = new Student()
                 .setUsername("e2")
                 .setPassword("234")
                 .setFirstname("fName2")
                 .setLastname("lName2")
                 .setNationalCode(234L)
-                .setFacultyMember(true)
                 .setTermNumber(2);
     }
 
     @AfterEach
     void tearDown() {
         var em = repository.getManager();
-        repository.transaction(em, () -> em.createQuery("DELETE FROM Professor ")
+        repository.transaction(em, () -> em.createQuery("DELETE FROM Student ")
                 .executeUpdate());
     }
 
@@ -48,7 +47,6 @@ class ProfessorRepositoryImplTest extends UserRepositoryImplTest<Professor, Prof
                 .setFirstname(entity2.getFirstname())
                 .setLastname(entity2.getLastname())
                 .setNationalCode(entity2.getNationalCode())
-                .setFacultyMember(entity2.isFacultyMember())
                 .setTermNumber(entity2.getTermNumber());
 
         repository.update(entity1);
@@ -60,7 +58,6 @@ class ProfessorRepositoryImplTest extends UserRepositoryImplTest<Professor, Prof
                 () -> assertEquals(entity2.getFirstname(), actual.getFirstname()),
                 () -> assertEquals(entity2.getLastname(), actual.getLastname()),
                 () -> assertEquals(entity2.getNationalCode(), actual.getNationalCode()),
-                () -> assertEquals(entity2.isFacultyMember(), actual.isFacultyMember()),
                 () -> assertEquals(entity2.getTermNumber(), actual.getTermNumber())
         );
     }
