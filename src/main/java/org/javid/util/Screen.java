@@ -104,10 +104,10 @@ public class Screen {
         while (true) {
             System.out.println("Accepted format is yyyy-[m]m");
             try {
-                String s = SCANNER.nextLine().trim() + "-1";
+                String s = SCANNER.nextLine().trim();
                 if (s.isEmpty())
                     return null;
-                return Date.valueOf(s);
+                return Date.valueOf(s + "-1");
             } catch (IllegalArgumentException e) {
                 printError(errorMessage);
             }
