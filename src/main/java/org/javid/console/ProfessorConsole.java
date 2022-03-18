@@ -1,7 +1,7 @@
 package org.javid.console;
 
 import org.javid.Application;
-import org.javid.console.base.PersonConsole;
+import org.javid.console.base.UserConsole;
 import org.javid.model.Professor;
 import org.javid.model.ProfessorTerm;
 import org.javid.model.TermCourse;
@@ -11,7 +11,7 @@ import org.javid.util.Screen;
 import java.util.Collections;
 import java.util.List;
 
-public class ProfessorConsole extends PersonConsole<Professor, ProfessorService> {
+public class ProfessorConsole extends UserConsole<Professor, ProfessorService> {
 
     private final CourseConsole courseConsole;
     private final StudentConsole studentConsole;

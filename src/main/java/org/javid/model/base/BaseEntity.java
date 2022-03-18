@@ -20,7 +20,7 @@ import java.util.Objects;
 @Setter
 @Accessors(chain = true)
 @MappedSuperclass
-public class BaseEntity<ID extends Serializable> {
+public abstract class BaseEntity<ID extends Serializable> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

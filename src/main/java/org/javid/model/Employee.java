@@ -3,7 +3,7 @@ package org.javid.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.javid.model.base.Person;
+import org.javid.model.base.User;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -13,7 +13,7 @@ import javax.persistence.Entity;
 @Accessors(chain = true)
 @Entity
 @DiscriminatorValue("1")
-public class Employee extends Person {
+public class Employee extends User {
 
     private Long salary;
 

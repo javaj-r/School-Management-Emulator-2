@@ -1,7 +1,7 @@
 package org.javid.console;
 
 import org.javid.Application;
-import org.javid.console.base.PersonConsole;
+import org.javid.console.base.UserConsole;
 import org.javid.model.*;
 import org.javid.service.StudentService;
 import org.javid.util.Screen;
@@ -9,7 +9,7 @@ import org.javid.util.Screen;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class StudentConsole extends PersonConsole<Student, StudentService> {
+public class StudentConsole extends UserConsole<Student, StudentService> {
 
     private final CourseConsole courseConsole;
 

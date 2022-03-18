@@ -1,7 +1,7 @@
 package org.javid.console;
 
 import org.javid.Application;
-import org.javid.console.base.PersonConsole;
+import org.javid.console.base.UserConsole;
 import org.javid.context.ApplicationContext;
 import org.javid.model.Employee;
 import org.javid.service.EmployeeService;
@@ -10,7 +10,7 @@ import org.javid.util.Screen;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EmployeeConsole extends PersonConsole<Employee, EmployeeService> {
+public class EmployeeConsole extends UserConsole<Employee, EmployeeService> {
 
     public EmployeeConsole(EmployeeService service) {
         super(service);

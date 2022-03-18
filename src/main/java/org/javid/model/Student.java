@@ -3,7 +3,7 @@ package org.javid.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.javid.model.base.Person;
+import org.javid.model.base.User;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -14,7 +14,7 @@ import java.util.Set;
 @Accessors(chain = true)
 @Entity
 @DiscriminatorValue("3")
-public class Student extends Person {
+public class Student extends User {
 
     private Integer studentCode;
     private int termNumber;
