@@ -9,6 +9,11 @@ import javax.persistence.EntityManagerFactory;
 public class CourseRepositoryImpl extends CrudRepositoryImpl<Course, Integer> implements CourseRepository {
 
     public CourseRepositoryImpl(EntityManagerFactory factory, Class<Course> courseClass) {
-        super(factory, courseClass);
+        super(factory);
+    }
+
+    @Override
+    public Class<Course> getEntityClass() {
+        return Course.class;
     }
 }

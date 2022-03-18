@@ -14,6 +14,8 @@ public interface CrudRepository<T extends BaseEntity<ID>, ID extends Serializabl
 
     EntityManager getManager();
 
+    Class<T> getEntityClass();
+
     default void transaction(EntityManager manager, Runnable runnable) {
         var t = manager.getTransaction();
         try {

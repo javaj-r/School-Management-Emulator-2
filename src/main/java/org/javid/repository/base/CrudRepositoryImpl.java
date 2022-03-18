@@ -14,7 +14,6 @@ public abstract class CrudRepositoryImpl<T extends BaseEntity<ID>, ID extends Se
 
     private final EntityManagerFactory factory;
     private EntityManager manager;
-    protected final Class<T> tClass;
 
     @Override
     public EntityManager getManager() {
@@ -26,14 +25,14 @@ public abstract class CrudRepositoryImpl<T extends BaseEntity<ID>, ID extends Se
 
     @Override
     public List<T> findAll() {
-        var jpql = String.format("FROM %s t", tClass.getSimpleName());
-        return getManager().createQuery(jpql, tClass).getResultList();
+        var jpql = String.format("FROM %s t", getEntityClass().getSimpleName());
+        return getManager().createQuery(jpql, getEntityClass()).getResultList();
     }
 
     @Override
     public T findById(ID id) {
         var em = getManager();
-        return em.find(tClass, id);
+        return em.find(getEntityClass(), id);
     }
 
     @Override
@@ -48,7 +47,7 @@ public abstract class CrudRepositoryImpl<T extends BaseEntity<ID>, ID extends Se
 
     @Override
     public void deleteById(ID id) {
-        var jpql = String.format("DELETE FROM %s t WHERE t.id = :ID", tClass.getSimpleName());
+        var jpql = String.format("DELETE FROM %s t WHERE t.id = :ID", getEntityClass().getSimpleName());
         getManager().createQuery(jpql)
                 .setParameter("ID", id)
                 .executeUpdate();

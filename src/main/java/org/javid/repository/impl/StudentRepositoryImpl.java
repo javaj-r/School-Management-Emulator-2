@@ -11,4 +11,9 @@ public class StudentRepositoryImpl extends UserRepositoryImpl<Student> implement
     public StudentRepositoryImpl(EntityManagerFactory factory, Class<Student> studentClass) {
         super(factory, studentClass);
     }
+
+    @Override
+    public Class<Student> getEntityClass() {
+        return Student.class;
+    }
 }

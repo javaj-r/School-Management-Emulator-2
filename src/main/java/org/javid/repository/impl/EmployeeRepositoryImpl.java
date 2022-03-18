@@ -11,4 +11,9 @@ public class EmployeeRepositoryImpl extends UserRepositoryImpl<Employee> impleme
     public EmployeeRepositoryImpl(EntityManagerFactory factory, Class<Employee> employeeClass) {
         super(factory, employeeClass);
     }
+
+    @Override
+    public Class<Employee> getEntityClass() {
+        return Employee.class;
+    }
 }

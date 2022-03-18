@@ -11,4 +11,9 @@ public class ProfessorRepositoryImpl extends UserRepositoryImpl<Professor> imple
     public ProfessorRepositoryImpl(EntityManagerFactory factory, Class<Professor> professorClass) {
         super(factory, professorClass);
     }
+
+    @Override
+    public Class<Professor> getEntityClass() {
+        return Professor.class;
+    }
 }

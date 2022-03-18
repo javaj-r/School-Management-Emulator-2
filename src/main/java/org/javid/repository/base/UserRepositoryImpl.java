@@ -12,15 +12,15 @@ import javax.persistence.NoResultException;
 public abstract class UserRepositoryImpl<T extends User> extends CrudRepositoryImpl<T, Integer> implements UserRepository<T> {
 
     public UserRepositoryImpl(EntityManagerFactory factory, Class<T> tClass) {
-        super(factory, tClass);
+        super(factory);
     }
 
     @Override
     public T findByUsername(T entity) {
         try {
             var jpql = String.format("FROM %s t WHERE t.username = :Username"
-                    , tClass.getSimpleName());
-            return getManager().createQuery(jpql, tClass)
+                    , getEntityClass().getSimpleName());
+            return getManager().createQuery(jpql, getEntityClass())
                     .setParameter("Username", entity.getUsername())
                     .getSingleResult();
         } catch (NoResultException ignored) {
@@ -36,8 +36,8 @@ public abstract class UserRepositoryImpl<T extends User> extends CrudRepositoryI
         try {
             var jpql = String.format(
                     "FROM %s t WHERE t.username = :Username AND t.password = :Password"
-                    , tClass.getSimpleName());
-            return getManager().createQuery(jpql, tClass)
+                    , getEntityClass().getSimpleName());
+            return getManager().createQuery(jpql, getEntityClass())
                     .setParameter("Username", entity.getUsername())
                     .setParameter("Password", entity.getPassword())
                     .getSingleResult();
